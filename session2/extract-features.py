@@ -49,23 +49,33 @@ def extract_features(tokens) :
       tokenFeatures = [];
       t = tokens[k][0]
 
-      tokenFeatures.append("form="+t)
-      tokenFeatures.append("suf3="+t[-3:])
+   #   tokenFeatures.append("form="+t)        
+   #   tokenFeatures.append("suf3="+t[-3:])
+   #   if re.search('[0-9]', t) is not None:
+   #      tokenFeatures.append("numberIsPresent")
 
       if k>0 :
          tPrev = tokens[k-1][0]
-         tokenFeatures.append("formPrev="+tPrev)
-         tokenFeatures.append("suf3Prev="+tPrev[-3:])
-      else :
-         tokenFeatures.append("BoS")
 
+         # good
+         tokenFeatures.append("LastFirstLetter=" + tPrev[-1:] + t[0])
+ 
+   #      tokenFeatures.append("formPrev="+tPrev)
+   #      tokenFeatures.append("suf3Prev="+tPrev[-3:])
+   #      if re.search('[0-9]', tPrev) is not None:
+   #         tokenFeatures.append("numberIsPresentPrev")
+   #   
+   #   else :
+   #      tokenFeatures.append("BoS")      # Bos: Beginning of Sentence
+
+   
       if k<len(tokens)-1 :
          tNext = tokens[k+1][0]
-         tokenFeatures.append("formNext="+tNext)
-         tokenFeatures.append("suf3Next="+tNext[-3:])
-      else:
-         tokenFeatures.append("EoS")
-    
+   #      tokenFeatures.append("formNext="+tNext)
+   #      tokenFeatures.append("suf3Next="+tNext[-3:])
+   #   else:
+   #      tokenFeatures.append("EoS")      # EoS: End of Sentence
+
       result.append(tokenFeatures)
     
    return result
