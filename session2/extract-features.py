@@ -48,33 +48,70 @@ def extract_features(tokens) :
    for k in range(0,len(tokens)):
       tokenFeatures = [];
       t = tokens[k][0]
+      tokenFeatures.append("pref4="+t[:4])
 
-   #   tokenFeatures.append("form="+t)        
-   #   tokenFeatures.append("suf3="+t[-3:])
+      s = t.lower()
+      vcount=0
+      for i in range(0,len(s)):   
+      #Checks whether a character is a vowel  
+         if s[i] in ('a',"e","i","o","u"):  
+            vcount = vcount + 1;  
+      tokenFeatures.append("numVowels="+str(vcount))
+      tokenFeatures.append("form="+t)        
+      tokenFeatures.append("suf3="+t[-3:])
+      tokenFeatures.append("numLetters="+str(len(t)))
    #   if re.search('[0-9]', t) is not None:
    #      tokenFeatures.append("numberIsPresent")
 
       if k>0 :
          tPrev = tokens[k-1][0]
-
+         tokenFeatures.append("pref4Prev="+tPrev[:4])
          # good
-         tokenFeatures.append("LastFirstLetter=" + tPrev[-1:] + t[0])
+         tokenFeatures.append("LastFirstLetterPrev=" + tPrev[-1:] + t[0])
  
-   #      tokenFeatures.append("formPrev="+tPrev)
-   #      tokenFeatures.append("suf3Prev="+tPrev[-3:])
+         tokenFeatures.append("formPrev="+tPrev)
+         tokenFeatures.append("suf3Prev="+tPrev[-3:])
+         tokenFeatures.append("Suf4Pref3Prev=" + tPrev[-4:] + t[:3])
+         tokenFeatures.append("numLettersPrev="+str(len(tPrev)))
    #      if re.search('[0-9]', tPrev) is not None:
    #         tokenFeatures.append("numberIsPresentPrev")
    #   
-   #   else :
-   #      tokenFeatures.append("BoS")      # Bos: Beginning of Sentence
+      else :
+         tokenFeatures.append("BoS")      # Bos: Beginning of Sentence
 
-   
+      
+      if k>1 :
+         tPrev = tokens[k-1][0]
+         tPrevPrev = tokens[k-2][0]
+         tokenFeatures.append("pref4PrevPrev="+tPrevPrev[:4])
+         # good
+         tokenFeatures.append("LastFirstLetterPrevPrev=" + tPrevPrev[-1:] + tPrev[0])
+ 
+         tokenFeatures.append("formPrevPrev="+tPrevPrev)
+         tokenFeatures.append("suf3PrevPrev="+tPrevPrev[-3:])
+
+      
+         #tokenFeatures.append("="+tPrevPrev[-3:])
+
+   #      if re.search('[0-9]', tPrev) is not None:
+   #         tokenFeatures.append("numberIsPresentPrev")
+   #   
+      else :
+         tokenFeatures.append("BoS")      # Bos: Beginning of Sentence
+
+
       if k<len(tokens)-1 :
          tNext = tokens[k+1][0]
-   #      tokenFeatures.append("formNext="+tNext)
-   #      tokenFeatures.append("suf3Next="+tNext[-3:])
-   #   else:
-   #      tokenFeatures.append("EoS")      # EoS: End of Sentence
+         tokenFeatures.append("pref4Next="+tNext[:4])
+         tokenFeatures.append("LastFirstLetterNext=" + t[-1:] + tNext[0])
+
+         tokenFeatures.append("formNext="+tNext)
+         tokenFeatures.append("suf3Next="+tNext[-3:])
+
+         tokenFeatures.append("Suf4Pref3Next=" + t[-4:] + tNext[:3])
+         tokenFeatures.append("numLettersNext="+str(len(tNext)))
+      else:
+         tokenFeatures.append("EoS")      # EoS: End of Sentence
 
       result.append(tokenFeatures)
     
