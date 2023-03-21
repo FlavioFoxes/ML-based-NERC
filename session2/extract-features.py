@@ -42,7 +42,7 @@ def get_tag(token, spans) :
 ## -- Extract features for each token in given sentence
 
 def extract_features(tokens) :
-
+   # Commento
    # for each token, generate list of features and add it to the result
    result = []
    for k in range(0,len(tokens)):
