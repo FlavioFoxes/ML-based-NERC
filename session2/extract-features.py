@@ -48,7 +48,6 @@ def extract_features(tokens) :
    for k in range(0,len(tokens)):
       tokenFeatures = [];
       t = tokens[k][0]
-      tokenFeatures.append("pref4="+t[:4])
 
       s = t.lower()
       vcount=0
@@ -56,39 +55,47 @@ def extract_features(tokens) :
       #Checks whether a character is a vowel  
          if s[i] in ('a',"e","i","o","u"):  
             vcount = vcount + 1;  
+      tokenFeatures.append("form="+t)   
+      tokenFeatures.append("pref4="+t[:4])     
       tokenFeatures.append("numVowels="+str(vcount))
-      tokenFeatures.append("form="+t)        
       tokenFeatures.append("suf3="+t[-3:])
       tokenFeatures.append("numLetters="+str(len(t)))
+
+      tokenFeatures.append("begfin="+t[:2]+t[-2:]) # Niko
+      if k > 0:   # for the features that consider the previous word to extract the feature at the actual index
+         tPrev = tokens[k-1][0]
+         tokenFeatures.append("mid4="+tPrev[-2:]+t[:2])
+         tokenFeatures.append("lastFirst="+tPrev[-1:]+t[0])
+         #tokenFeatures.append("Suf4Pref3=" + tPrev[-4:] + t[:3])
+      else: 
+         tokenFeatures.append("mid4=##"+t[:2])
+         tokenFeatures.append("lastFirst=#"+t[0])
    #   if re.search('[0-9]', t) is not None:
    #      tokenFeatures.append("numberIsPresent")
+
 
       if k>0 :
          tPrev = tokens[k-1][0]
          tokenFeatures.append("pref4Prev="+tPrev[:4])
          # good
-         tokenFeatures.append("LastFirstLetterPrev=" + tPrev[-1:] + t[0])
- 
          tokenFeatures.append("formPrev="+tPrev)
          tokenFeatures.append("suf3Prev="+tPrev[-3:])
-         tokenFeatures.append("Suf4Pref3Prev=" + tPrev[-4:] + t[:3])
+         
          tokenFeatures.append("numLettersPrev="+str(len(tPrev)))
    #      if re.search('[0-9]', tPrev) is not None:
    #         tokenFeatures.append("numberIsPresentPrev")
-   #   
+         tokenFeatures.append("begFinPrev="+tPrev[:2]+tPrev[-2:]) # Niko
+
       else :
          tokenFeatures.append("BoS")      # Bos: Beginning of Sentence
 
       
       if k>1 :
          tPrev = tokens[k-1][0]
-         tPrevPrev = tokens[k-2][0]
-         tokenFeatures.append("pref4PrevPrev="+tPrevPrev[:4])
+         tPrev2 = tokens[k-2][0]
          # good
-         tokenFeatures.append("LastFirstLetterPrevPrev=" + tPrevPrev[-1:] + tPrev[0])
- 
-         tokenFeatures.append("formPrevPrev="+tPrevPrev)
-         tokenFeatures.append("suf3PrevPrev="+tPrevPrev[-3:])
+         tokenFeatures.append("mid4Prev="+tPrev2[-2:]+tPrev[:2])
+         tokenFeatures.append("lastFirstPrev="+tPrev2[-1:]+tPrev[0])
 
       
          #tokenFeatures.append("="+tPrevPrev[-3:])
@@ -102,14 +109,14 @@ def extract_features(tokens) :
 
       if k<len(tokens)-1 :
          tNext = tokens[k+1][0]
-         tokenFeatures.append("pref4Next="+tNext[:4])
-         tokenFeatures.append("LastFirstLetterNext=" + t[-1:] + tNext[0])
-
          tokenFeatures.append("formNext="+tNext)
+         tokenFeatures.append("pref4Next="+tNext[:4])
+         tokenFeatures.append("lastFirstNext=" + t[-1:] + tNext[0])
          tokenFeatures.append("suf3Next="+tNext[-3:])
-
-         tokenFeatures.append("Suf4Pref3Next=" + t[-4:] + tNext[:3])
+         #tokenFeatures.append("Suf4Pref3Next=" + t[-4:] + tNext[:3])
          tokenFeatures.append("numLettersNext="+str(len(tNext)))
+         tokenFeatures.append("begFinNext="+tNext[:2]+tNext[-2:])
+         tokenFeatures.append("mid4Next="+t[-2:]+tNext[:2])
       else:
          tokenFeatures.append("EoS")      # EoS: End of Sentence
 
