@@ -2,6 +2,7 @@
 
 import sys
 import re
+import math
 from os import listdir
 
 from xml.dom.minidom import parse
@@ -41,63 +42,133 @@ def get_tag(token, spans) :
 ## --------- Feature extractor ----------- 
 ## -- Extract features for each token in given sentence
 
+def count_connected_letters(txt, letters):
+   low = txt.lower()
+   connectedLetters = 0
+   for i in range(len(low)-1): 
+      if low[i] in letters and low[i+1] in letters: 
+         connectedLetters += 1
+   return connectedLetters
+
+def first_connected_letters(txt, letters):
+   low = txt.lower()
+   for i in range(len(low)-1): 
+      if low[i] in letters and low[i+1] in letters: 
+         return str(low[i]+low[i+1])
+   return "NaN"
+
+def count_commas_lines(txt): 
+   retVal = 0
+   for i in range(len(txt)):
+      if txt[i] == ',' or txt[i] == '-':
+         retVal += 1
+   return retVal
+
+def digits_and_sign(txt):
+   digits = ['0','1','2','3','4','5','6','7','8','9']
+   signs = [',','-']
+   retVal = 0
+   for i in range(len(txt)-1):
+      if (txt[i] in signs and txt[i+1] in digits) or (txt[i] in digits and txt[i+1] in signs):
+         retVal += 1
+   return retVal
+
+def count_upper(txt):
+   retVal = 0
+   for i in range(len(txt)):
+      if (txt[i].isupper()):
+         retVal += 1
+   return retVal
+
 def extract_features(tokens) :
    # Commento
    # for each token, generate list of features and add it to the result
    result = []
+   consonants = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z']
+   vowels = ['a','e','i','o','u']
    for k in range(0,len(tokens)):
       tokenFeatures = [];
       t = tokens[k][0]
 
-      s = t.lower()
-      vcount=0
-      for i in range(0,len(s)):   
-      #Checks whether a character is a vowel  
-         if s[i] in ('a',"e","i","o","u"):  
-            vcount = vcount + 1;  
-      tokenFeatures.append("form="+t)   
-      tokenFeatures.append("pref4="+t[:4])     
-      tokenFeatures.append("numVowels="+str(vcount))
-      tokenFeatures.append("suf3="+t[-3:])
-      tokenFeatures.append("numLetters="+str(len(t)))
 
-      tokenFeatures.append("begfin="+t[:2]+t[-2:]) # Niko
-      if k > 0:   # for the features that consider the previous word to extract the feature at the actual index
+      
+      
+      ### CURRENT TOKEN ###
+      tokenFeatures.append("form="+t)   
+      tokenFeatures.append("numLetters="+str(len(t)))
+      #tokenFeatures.append("numVowels="+str(vcount))
+      tokenFeatures.append("pref4="+t[:4])     
+      tokenFeatures.append("suf3="+t[-3:])
+      # tokenFeatures.append("Suf4Pref3=" + tPrev[-4:] + t[:3])
+
+      # NIKO
+      tokenFeatures.append("begfin="+t[:2]+t[-2:]) 
+      tokenFeatures.append("skip="+t[0:len(t)-1:2])
+      tokenFeatures.append("connCons="+str(count_connected_letters(t,consonants)))
+      tokenFeatures.append("firstConnCons="+first_connected_letters(t,consonants))
+      # tokenFeatures.append("connVowels="+str(count_connected_letters(t,vowels)))
+      # tokenFeatures.append("firstConnVowels="+first_connected_letters(t,vowels)) VOWELS NOT THAT USEFUL
+      tokenFeatures.append("numSigns="+str(digits_and_sign(t))) # -> not so good 
+      tokenFeatures.append("upperCaseCount="+str(count_upper(t)))
+      if len(t) % 2 == 0:
+         mid = int(len(t)/2)
+         tokenFeatures.append("central="+t[mid-1:mid])
+      else:
+         mid = int(math.floor(len(t)/2))
+         tokenFeatures.append("central="+t[mid:mid+1])
+      tokenFeatures.append("lmr="+t[0]+t[mid]+t[len(t)-1])   
+
+      if k > 0:   # for the features that consider the previous token to extract the feature at the actual index
          tPrev = tokens[k-1][0]
          tokenFeatures.append("mid4="+tPrev[-2:]+t[:2])
          tokenFeatures.append("lastFirst="+tPrev[-1:]+t[0])
-         #tokenFeatures.append("Suf4Pref3=" + tPrev[-4:] + t[:3])
       else: 
          tokenFeatures.append("mid4=##"+t[:2])
          tokenFeatures.append("lastFirst=#"+t[0])
-   #   if re.search('[0-9]', t) is not None:
-   #      tokenFeatures.append("numberIsPresent")
 
+      if k < len(tokens) - 1: # for the features that consider the next token to excract the feature at the actual index
+         tNext = tokens[k+1][0]
+         tokenFeatures.append("firstFollowing="+t[:2]+tNext[:2])
+      else: 
+         tokenFeatures.append("firstFollowing="+t[:2]+"##")
+   
+      ### PREVIOUS TOKEN ### 
 
       if k>0 :
          tPrev = tokens[k-1][0]
-         tokenFeatures.append("pref4Prev="+tPrev[:4])
-         # good
          tokenFeatures.append("formPrev="+tPrev)
+         tokenFeatures.append("numLettersPrev="+str(len(tPrev)))
+         # good
+         tokenFeatures.append("pref4Prev="+tPrev[:4])
          tokenFeatures.append("suf3Prev="+tPrev[-3:])
          
-         tokenFeatures.append("numLettersPrev="+str(len(tPrev)))
-   #      if re.search('[0-9]', tPrev) is not None:
-   #         tokenFeatures.append("numberIsPresentPrev")
-         tokenFeatures.append("begFinPrev="+tPrev[:2]+tPrev[-2:]) # Niko
-
+      # NIKO
+         tokenFeatures.append("begFinPrev="+tPrev[:2]+tPrev[-2:])
+         tokenFeatures.append("skipPrev="+tPrev[0:len(tPrev)-1:2])
+         tokenFeatures.append("connConsPrev="+str(count_connected_letters(tPrev,consonants)))
+         tokenFeatures.append("firstConnConsPrev="+ first_connected_letters(tPrev,consonants))
+         # tokenFeatures.append("connVowelsPrev="+str(count_connected_letters(tPrev, vowels)))
+         # tokenFeatures.append("firstConnVowelsPrev="+ first_connected_letters(tPrev,vowels)) 
+         tokenFeatures.append("numSignsPrev="+str(digits_and_sign(tPrev))) 
+         tokenFeatures.append("upperCaseCountPrev="+str(tPrev))
+         if len(tPrev) % 2 == 0:
+            mid = int(len(tPrev)/2)
+            tokenFeatures.append("centralPrev="+tPrev[mid-1:mid])
+         else:
+            mid = int(math.floor(len(tPrev)/2))
+            tokenFeatures.append("centralPrev="+tPrev[mid:mid+1])
+         tokenFeatures.append("lmrPrev="+tPrev[0]+tPrev[mid]+tPrev[len(tPrev)-1])
+         tokenFeatures.append("firstFollowingPrev="+tPrev[:2]+t[:2])
       else :
          tokenFeatures.append("BoS")      # Bos: Beginning of Sentence
 
-      
+ 
       if k>1 :
          tPrev = tokens[k-1][0]
          tPrev2 = tokens[k-2][0]
          # good
          tokenFeatures.append("mid4Prev="+tPrev2[-2:]+tPrev[:2])
          tokenFeatures.append("lastFirstPrev="+tPrev2[-1:]+tPrev[0])
-
-      
          #tokenFeatures.append("="+tPrevPrev[-3:])
 
    #      if re.search('[0-9]', tPrev) is not None:
@@ -106,19 +177,42 @@ def extract_features(tokens) :
       else :
          tokenFeatures.append("BoS")      # Bos: Beginning of Sentence
 
+      ### NEXT TOKEN ###
 
       if k<len(tokens)-1 :
          tNext = tokens[k+1][0]
          tokenFeatures.append("formNext="+tNext)
-         tokenFeatures.append("pref4Next="+tNext[:4])
-         tokenFeatures.append("lastFirstNext=" + t[-1:] + tNext[0])
-         tokenFeatures.append("suf3Next="+tNext[-3:])
-         #tokenFeatures.append("Suf4Pref3Next=" + t[-4:] + tNext[:3])
          tokenFeatures.append("numLettersNext="+str(len(tNext)))
+         tokenFeatures.append("pref4Next="+tNext[:4])
+         tokenFeatures.append("suf3Next="+tNext[-3:])
+         tokenFeatures.append("lastFirstNext=" + t[-1:] + tNext[0])
+         tokenFeatures.append("Suf4Pref3Next=" + t[-4:] + tNext[:3])
+
+         # NIKO
+         tokenFeatures.append("skipNext="+tNext[0:len(tNext)-1:2])
          tokenFeatures.append("begFinNext="+tNext[:2]+tNext[-2:])
          tokenFeatures.append("mid4Next="+t[-2:]+tNext[:2])
+         tokenFeatures.append("connConsNext="+str(count_connected_letters(tNext,consonants)))
+         tokenFeatures.append("firstConnConsNext="+first_connected_letters(tNext,consonants))
+         # tokenFeatures.append("connVowelsNext="+str(count_connected_letters(tNext,vowels)))
+         # tokenFeatures.append("firstConnVowelsNext="+first_connected_letters(tNext,vowels)) 
+         tokenFeatures.append("numSignsNext="+str(digits_and_sign(tNext)))
+         tokenFeatures.append("upperCaseCountNext="+str(count_upper(tNext)))
+         if len(tNext) % 2 == 0:
+            mid = int(len(tNext)/2)
+            tokenFeatures.append("centralNext="+tNext[mid-1:mid])
+         else:
+            mid = int(math.floor(len(tNext)/2))
+            tokenFeatures.append("centralNext="+tNext[mid:mid+1])
+         tokenFeatures.append("lmrNext="+tNext[0]+tNext[mid]+tNext[len(tNext)-1])
       else:
          tokenFeatures.append("EoS")      # EoS: End of Sentence
+      
+      if k < len(tokens) - 2: 
+         tNext = tokens[k+1][0]
+         tNext2 = tokens[k+2][0]
+         tokenFeatures.append("firstFollowingNext="+tNext[:2]+tNext2[:2])
+      else: tokenFeatures.append("EoS")
 
       result.append(tokenFeatures)
     
