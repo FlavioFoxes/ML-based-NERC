@@ -2,7 +2,6 @@
 
 import sys
 import re
-import math
 from os import listdir
 
 from xml.dom.minidom import parse
@@ -81,19 +80,16 @@ def count_upper(txt):
    return retVal
 
 def extract_features(tokens) :
-   # PIPPO
-   # for each token, generate list of features and add it to the result
    result = []
    consonants = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z']
    vowels = ['a','e','i','o','u']
    for k in range(0,len(tokens)):
-      tokenFeatures = [];
       t = tokens[k][0]
+      tokenFeatures = [];
+   # PIPPO
+   # for each token, generate list of features and add it to the result
+   ### CURRENT TOKEN ###
 
-
-      
-      
-      ### CURRENT TOKEN ###
       tokenFeatures.append("form="+t)   
       tokenFeatures.append("numLetters="+str(len(t)))
       #tokenFeatures.append("numVowels="+str(vcount))
