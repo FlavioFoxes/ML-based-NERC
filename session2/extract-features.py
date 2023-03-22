@@ -1,5 +1,6 @@
 #! /usr/bin/python3
 
+import math
 import sys
 import re
 from os import listdir
@@ -89,7 +90,9 @@ def extract_features(tokens) :
    # PIPPO
    # for each token, generate list of features and add it to the result
    ### CURRENT TOKEN ###
-
+      for i in range(0,len(t)-2):
+         tokenFeatures.append("seq3="+t[i]+t[i+1]+t[i+2])
+      tokenFeatures.append("reverse="+t[len(t)::-1])
       tokenFeatures.append("form="+t)   
       tokenFeatures.append("numLetters="+str(len(t)))
       #tokenFeatures.append("numVowels="+str(vcount))
@@ -132,6 +135,10 @@ def extract_features(tokens) :
 
       if k>0 :
          tPrev = tokens[k-1][0]
+         for i in range(0,len(tPrev)-2):
+            tokenFeatures.append("seq3Prev="+tPrev[i]+tPrev[i+1]+tPrev[i+2])
+      
+         tokenFeatures.append("reversePrev="+tPrev[len(t)::-1])
          tokenFeatures.append("formPrev="+tPrev)
          tokenFeatures.append("numLettersPrev="+str(len(tPrev)))
          # good
@@ -177,6 +184,11 @@ def extract_features(tokens) :
 
       if k<len(tokens)-1 :
          tNext = tokens[k+1][0]
+
+         for i in range(0,len(tNext)-2):
+            tokenFeatures.append("seq3Next="+tNext[i]+tNext[i+1]+tNext[i+2])
+      
+         tokenFeatures.append("reverseNext="+tNext[len(t)::-1])
          tokenFeatures.append("formNext="+tNext)
          tokenFeatures.append("numLettersNext="+str(len(tNext)))
          tokenFeatures.append("pref4Next="+tNext[:4])
