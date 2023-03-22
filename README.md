@@ -28,7 +28,7 @@ python3 session2/extract-features.py data/train > train_mem.feat
 cat train.feat | cut -f5- | grep -v ^$ > train.mem.feat
 ```
 ```
-./megam-64.opt -quiet -nc -nobias multiclass train.mem.feat > model.mem
+session2/megam-64.opt -quiet -nc -nobias multiclass train.mem.feat > model.mem
 ```
 ```
 python3 session2/extract-features.py data/devel > devel_mem.feat
