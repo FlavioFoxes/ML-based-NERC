@@ -15,5 +15,5 @@ python3 session2/extract-features.py data/devel > devel.feat
 python3 session2/predict.py model.crf <devel.feat >devel.out
 ```
 ```
-python3 util/evaluator.py data/devel devel.out
+python3 util/evaluator.py NER data/devel devel.out
 ```
