@@ -81,7 +81,7 @@ def count_upper(txt):
    return retVal
 
 def extract_features(tokens) :
-   # Commento
+   # PIPPO
    # for each token, generate list of features and add it to the result
    result = []
    consonants = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z']
